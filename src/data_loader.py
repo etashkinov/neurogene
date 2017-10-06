@@ -1,6 +1,6 @@
 from os import walk
 from PIL import Image
-import figures
+from src import figures
 
 
 def get_data(path):

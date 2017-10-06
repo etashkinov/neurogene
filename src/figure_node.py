@@ -6,7 +6,7 @@ from tflearn.layers.estimator import regression
 import numpy as np
 import tensorflow as tf
 
-import data_loader
+from src import data_loader
 
 activations = ('relu', 'tanh')
 optimizers = ('sgd', 'adam')
@@ -15,11 +15,11 @@ regulizers = ('L1', 'L2')
 
 
 def create_network(params):
-    name = "net_" + str(params)\
-        .replace('(', '')\
-        .replace(')', '')\
-        .replace(',', '')\
-        .replace(' ', '')\
+    name = "net_" + str(params) \
+        .replace('(', '') \
+        .replace(')', '') \
+        .replace(',', '') \
+        .replace(' ', '') \
         .replace('.', '')
 
     print('Create network:' + name)
@@ -70,11 +70,11 @@ def create_network(params):
 
 
 def fit(train, test, epoch, params):
-    train_x = array([t.encoding for t in train])
-    train_y = array([t.one_hot for t in train])
+    train_x = np.array([t.encoding for t in train])
+    train_y = np.array([t.one_hot for t in train])
 
-    test_x = array([t.encoding for t in test])
-    test_y = array([t.one_hot for t in test])
+    test_x = np.array([t.encoding for t in test])
+    test_y = np.array([t.one_hot for t in test])
 
     graph = tf.Graph()
     with graph.as_default():
@@ -93,10 +93,10 @@ train = data_loader.get_data('../figures')
 test = data_loader.get_data('../objects')
 
 prediction = fit(train, test, 100, (
-    (1,32, 0,1,0,  3,2),
-    (1,64, 0,1,0,  3,2),
-    (0,128,1,0,0.8,0,0),
-    (0,256,1,0,0.8,0,0),
+    (1, 32, 0, 1, 0, 3, 2),
+    (1, 64, 0, 1, 0, 3, 2),
+    (0, 128, 1, 0, 0.8, 0, 0),
+    (0, 256, 1, 0, 0.8, 0, 0),
     (1, 0.01, 0)
 ))
 print(prediction)
