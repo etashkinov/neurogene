@@ -5,6 +5,7 @@ from tflearn.layers.normalization import local_response_normalization
 from tflearn.layers.estimator import regression
 import numpy as np
 import tensorflow as tf
+import os
 
 from src import data_loader
 
@@ -12,6 +13,14 @@ activations = ('relu', 'tanh')
 optimizers = ('sgd', 'adam')
 losses = ('categorical_crossentropy', 'whatever')
 regulizers = ('L1', 'L2')
+
+DEFAULT_NET = (
+    (1, 32, 0, 1, 0, 3, 2),
+    (1, 64, 0, 1, 0, 3, 2),
+    (0, 128, 1, 0, 0.8, 0, 0),
+    (0, 256, 1, 0, 0.8, 0, 0),
+    (1, 0.01, 0)
+)
 
 
 def create_network(params):
@@ -69,34 +78,34 @@ def create_network(params):
     return network, name
 
 
-def fit(train, test, epoch, params):
+def fit(train, test, epoch, model, name):
     train_x = np.array([t.encoding for t in train])
     train_y = np.array([t.one_hot for t in train])
 
     test_x = np.array([t.encoding for t in test])
     test_y = np.array([t.one_hot for t in test])
 
-    graph = tf.Graph()
-    with graph.as_default():
-        network, name = create_network(params)
-        model = tflearn.DNN(network, tensorboard_verbose=3, tensorboard_dir='board')
-        model.fit({'input': train_x}, {'target': train_y}, n_epoch=epoch,
-                  validation_set=({'input': test_x}, {'target': test_y}),
-                  snapshot_step=100, show_metric=True, run_id=name)
+    model.fit({'input': train_x}, {'target': train_y}, n_epoch=epoch,
+              validation_set=({'input': test_x}, {'target': test_y}),
+              snapshot_step=100, show_metric=True, run_id=name)
 
+
+def init_default():
+    network, name = create_network(DEFAULT_NET)
+    model = tflearn.DNN(network, tensorboard_verbose=3, tensorboard_dir='board')
+
+    if os.path.isfile(name + ".index"):
+        model.load(name)
+    else:
+        train = data_loader.get_data('../figures')
+        test = data_loader.get_data('../objects')
+
+        fit(train, test, 100, model, DEFAULT_NET)
         model.save(name)
 
-        return model, name
+    return model
 
 
-train = data_loader.get_data('../figures')
-test = data_loader.get_data('../objects')
+def evaluate(data):
+    model.predict((data,))
 
-prediction = fit(train, test, 100, (
-    (1, 32, 0, 1, 0, 3, 2),
-    (1, 64, 0, 1, 0, 3, 2),
-    (0, 128, 1, 0, 0.8, 0, 0),
-    (0, 256, 1, 0, 0.8, 0, 0),
-    (1, 0.01, 0)
-))
-print(prediction)
